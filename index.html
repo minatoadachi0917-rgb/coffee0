@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BREWMIND — あなただけのコーヒー診断</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Zen+Kaku+Gothic+New:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<nav>
+  <div class="nav-logo">BREW<span>MIND</span></div>
+  <div class="nav-links">
+    <a onclick="showSection('hero')" class="active" id="nav-hero">TOP</a>
+    <a onclick="startQuiz()" id="nav-quiz">診断</a>
+    <a onclick="showRoasters()" id="nav-roasters">ロースター</a>
+    <a onclick="showSection('plans')" id="nav-plans">プラン</a>
+    <a onclick="openLogin()" class="nav-cta">ログイン</a>
+  </div>
+</nav>
+
+<div class="loading-overlay hidden" id="loading">
+  <div class="coffee-anim"></div>
+  <div class="loading-text">あなたのコーヒーを分析中…</div>
+  <div class="loading-steps" id="loading-step">好みのプロファイルを構築しています</div>
+</div>
+
+<div class="modal-overlay hidden" id="login-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeLogin()">✕</button>
+    <div class="modal-title">おかえりなさい</div>
+    <div class="modal-sub">アカウントにサインインして、診断履歴やプレミアム機能をご利用ください。</div>
+    <input class="modal-input" type="email" placeholder="メールアドレス">
+    <input class="modal-input" type="password" placeholder="パスワード">
+    <button class="btn-primary" style="width:100%;margin-bottom:1rem;" onclick="closeLogin()">サインイン</button>
+    <div style="text-align:center;font-size:0.8rem;color:var(--muted)">
+      アカウントをお持ちでない方は <a href="#" onclick="closeLogin();showSection('plans')" style="color:var(--caramel);text-decoration:none">新規登録</a>
+    </div>
+  </div>
+</div>
+
+<section id="hero" class="active">
+  <div class="hero-eyebrow">AI × コーヒー診断</div>
+  <div class="hero-title">
+    あなたの<em>理想の一杯</em>を<br>科学的に発見する
+  </div>
+  <p class="hero-sub">
+    3分間の診断で、あなたの味覚・ライフスタイル・気分に合った
+    パーフェクトなコーヒーをAIが導き出します。
+  </p>
+  <div class="hero-btns">
+    <button class="btn-primary" onclick="startQuiz()">無料で診断を始める</button>
+    <button class="btn-outline" onclick="showSection('plans')">プレミアムプランを見る</button>
+  </div>
+  <div class="hero-features">
+    <div class="hero-feature">
+      <div class="hero-feature-icon">☕</div>
+      <div class="hero-feature-label">味覚診断</div>
+    </div>
+    <div class="hero-feature">
+      <div class="hero-feature-icon">🗾</div>
+      <div class="hero-feature-label">全国ロースター</div>
+    </div>
+    <div class="hero-feature">
+      <div class="hero-feature-icon">✨</div>
+      <div class="hero-feature-label">パーソナルAI</div>
+    </div>
+    <div class="hero-feature">
+      <div class="hero-feature-icon">📊</div>
+      <div class="hero-feature-label">詳細レポート</div>
+    </div>
+  </div>
+</section>
+
+<section id="quiz">
+  <div class="quiz-container">
+    <div class="quiz-progress" id="quiz-progress"></div>
+    <div id="quiz-steps"></div>
+    <div class="quiz-nav">
+      <button class="btn-back" id="btn-back" onclick="quizBack()" style="visibility:hidden">← 戻る</button>
+      <button class="btn-primary" id="btn-next" onclick="quizNext()" disabled>次へ →</button>
+    </div>
+  </div>
+</section>
+
+<section id="result">
+  <div class="result-inner" id="result-content"></div>
+</section>
+
+<section id="roasters">
+  <div class="page-header">
+    <div class="page-eyebrow">全国のスペシャルティコーヒー</div>
+    <div class="page-title">日本のロースターを発見する</div>
+    <p class="page-sub">北海道から沖縄まで、こだわりのロースターを地域・スタイル別に探せます。</p>
+  </div>
+  <div id="roasters-content"></div>
+</section>
+
+<section id="plans">
+  <div class="plans-inner">
+    <div class="page-eyebrow">料金プラン</div>
+    <div class="plans-title">あなたのコーヒーライフを<br>もっと豊かに</div>
+    <p class="plans-sub">無料から始めて、いつでもアップグレード可能</p>
+    <div class="plans-grid">
+      <div class="plan-card">
+        <div class="plan-name">フリー</div>
+        <div class="plan-price"><sup>¥</sup>0</div>
+        <div class="plan-period">永久無料</div>
+        <div class="plan-divider"></div>
+        <ul class="plan-features">
+          <li><span class="feat-check">✓</span> AI診断（月3回）</li>
+          <li><span class="feat-check">✓</span> 基本結果の確認</li>
+          <li><span class="feat-check">✓</span> おすすめ豆の提案</li>
+          <li><span class="feat-x">—</span> <span style="color:var(--muted)">全国ロースター検索</span></li>
+          <li><span class="feat-x">—</span> <span style="color:var(--muted)">詳細フレーバーレポート</span></li>
+          <li><span class="feat-x">—</span> <span style="color:var(--muted)">診断履歴の保存</span></li>
+        </ul>
+        <button class="plan-cta" onclick="startQuiz()">無料で始める</button>
+      </div>
+      <div class="plan-card featured">
+        <div class="plan-badge">人気 No.1</div>
+        <div class="plan-name">スタンダード</div>
+        <div class="plan-price"><sup>¥</sup>680<sub>/月</sub></div>
+        <div class="plan-period">年払いで¥550/月</div>
+        <div class="plan-divider"></div>
+        <ul class="plan-features">
+          <li><span class="feat-check">✓</span> AI診断（無制限）</li>
+          <li><span class="feat-check">✓</span> 詳細フレーバーレポート</li>
+          <li><span class="feat-check">✓</span> 全国ロースター検索・閲覧</li>
+          <li><span class="feat-check">✓</span> 診断履歴の保存（12ヶ月）</li>
+          <li><span class="feat-check">✓</span> マップで探すロースター</li>
+          <li><span class="feat-x">—</span> <span style="color:var(--muted)">プロバリスタ監修コメント</span></li>
+        </ul>
+        <button class="plan-cta" onclick="openLogin()">スタートする</button>
+      </div>
+      <div class="plan-card">
+        <div class="plan-name">プレミアム</div>
+        <div class="plan-price"><sup>¥</sup>1,480<sub>/月</sub></div>
+        <div class="plan-period">年払いで¥1,180/月</div>
+        <div class="plan-divider"></div>
+        <ul class="plan-features">
+          <li><span class="feat-check">✓</span> スタンダードの全機能</li>
+          <li><span class="feat-check">✓</span> プロバリスタ監修コメント</li>
+          <li><span class="feat-check">✓</span> 季節限定豆の先行案内</li>
+          <li><span class="feat-check">✓</span> ロースター直接問い合わせ</li>
+          <li><span class="feat-check">✓</span> コーヒー日記機能</li>
+          <li><span class="feat-check">✓</span> 優先サポート</li>
+        </ul>
+        <button class="plan-cta" onclick="openLogin()">スタートする</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  &copy; 2024 <strong>BREWMIND</strong> — Powered by AI × 日本のコーヒー文化
+</footer>
+
+<script>
+let currentStep = 0;
+let answers = {};
+let isPremium = false;
+
+const quizSteps = [
+  {
+    id: 'time',
+    category: '☀️ 生活スタイル',
+    question: 'コーヒーを飲むのはいつですか？',
+    hint: 'メインで飲む時間帯を教えてください',
+    options: [
+      { icon: '🌅', label: '朝一番（起き抜け）', desc: '目覚めの一杯', value: 'morning' },
+      { icon: '💼', label: '仕事中・午前', desc: '集中力を高めたい', value: 'work-am' },
+      { icon: '🍽️', label: '食後・午後', desc: '食事の締めに', value: 'after-meal' },
+      { icon: '🌙', label: '夜・リラックス時', desc: 'ゆったり過ごしたい', value: 'evening' }
+    ]
+  },
+  {
+    id: 'feeling',
+    category: '💭 気分・目的',
+    question: 'コーヒーに求めるものは？',
+    hint: '今のあなたの気持ちに近いものを選んでください',
+    options: [
+      { icon: '⚡', label: '覚醒・集中', desc: 'しっかり目を覚ましたい', value: 'focus' },
+      { icon: '🧘', label: '癒し・リラックス', desc: 'ほっとしたい', value: 'relax' },
+      { icon: '😊', label: '楽しみ・趣味', desc: '風味を楽しみたい', value: 'enjoy' },
+      { icon: '🤝', label: '会話・コミュニケーション', desc: '誰かと一緒に', value: 'social' }
+    ]
+  },
+  {
+    id: 'taste',
+    category: '👅 味覚プロファイル',
+    question: '好きな味の方向性は？',
+    hint: '直感で選んでください',
+    layout: 'two-col',
+    options: [
+      { icon: '🍫', label: 'コクのある苦味', desc: 'ビター・チョコレート系', value: 'bitter' },
+      { icon: '🍋', label: 'さわやかな酸味', desc: 'フルーティー・明るい', value: 'acidic' },
+      { icon: '🍯', label: '甘くまろやか', desc: 'キャラメル・ナッツ系', value: 'sweet' },
+      { icon: '🌿', label: 'すっきりクリーン', desc: 'クリア・後味が軽い', value: 'clean' }
+    ]
+  },
+  {
+    id: 'milk',
+    category: '🥛 スタイル',
+    question: 'ミルクやシロップは入れますか？',
+    hint: 'いつもの飲み方を教えてください',
+    options: [
+      { icon: '☕', label: 'ブラックのみ', desc: '豆の風味をそのまま楽しむ', value: 'black' },
+      { icon: '🥛', label: 'ミルク・ラテ系', desc: 'まろやかに飲みたい', value: 'milk' },
+      { icon: '🍬', label: 'シロップ・甘め', desc: '甘いのが好き', value: 'sweet' },
+      { icon: '🎲', label: '気分による', desc: 'その日次第', value: 'varies' }
+    ]
+  },
+  {
+    id: 'experience',
+    category: '📚 コーヒー経験',
+    question: 'コーヒーとの関わり方は？',
+    hint: 'あなたの現在地を教えてください',
+    options: [
+      { icon: '🌱', label: 'コーヒー初心者', desc: 'これから深めていきたい', value: 'beginner' },
+      { icon: '☕', label: 'カフェ好き', desc: '色々なお店を巡るのが好き', value: 'cafe-lover' },
+      { icon: '🏠', label: 'ホームバリスタ', desc: '自宅でこだわって淹れる', value: 'home-barista' },
+      { icon: '🎓', label: 'コーヒーマニア', desc: '産地・品種まで気にする', value: 'geek' }
+    ]
+  }
+];
+
+const conditionalSteps = {
+  'home-barista': {
+    id: 'brew-method',
+    category: '⚙️ 抽出器具',
+    question: '普段使っている器具は？',
+    hint: '複数ある場合はメインのものを選んでください',
+    options: [
+      { icon: '🫗', label: 'ドリップ（ペーパー）', desc: 'ハンドドリップが好き', value: 'drip' },
+      { icon: '🔴', label: 'エスプレッソマシン', desc: '本格的な抽出を楽しむ', value: 'espresso' },
+      { icon: '🟡', label: 'フレンチプレス', desc: 'コクのある一杯を', value: 'french-press' },
+      { icon: '⬛', label: 'AeroPress / 他', desc: 'いろいろ試している', value: 'aeropress' }
+    ]
+  },
+  'geek': {
+    id: 'origin-pref',
+    category: '🌍 産地の好み',
+    question: '好みの産地はありますか？',
+    hint: '直感でOKです',
+    options: [
+      { icon: '🇪🇹', label: 'エチオピア', desc: 'フルーティー・花のような香り', value: 'ethiopia' },
+      { icon: '🇯🇲', label: '中南米（コロンビア等）', desc: 'バランスよくナッツ感', value: 'latin' },
+      { icon: '🇮🇩', label: 'アジア（インドネシア等）', desc: 'どっしりしたコク', value: 'asia' },
+      { icon: '🌐', label: '産地より焙煎度重視', desc: '浅・中・深で選びたい', value: 'roast-level' }
+    ]
+  }
+};
+
+let activeSteps = [];
+
+function startQuiz() {
+  answers = {};
+  currentStep = 0;
+  activeSteps = [...quizSteps];
+  renderQuiz();
+  showSection('quiz');
+}
+
+function renderQuiz() {
+  const stepsEl = document.getElementById('quiz-steps');
+  const progressEl = document.getElementById('quiz-progress');
+
+  progressEl.innerHTML = activeSteps.map((_, i) =>
+    `<div class="progress-bar ${i < currentStep ? 'done' : i === currentStep ? 'active' : ''}"></div>`
+  ).join('');
+
+  stepsEl.innerHTML = activeSteps.map((step, i) => `
+    <div class="quiz-step ${i === currentStep ? 'active' : ''}" data-step="${i}">
+      <div class="quiz-category">${step.category}</div>
+      <div class="quiz-question">${step.question}</div>
+      <div class="quiz-hint">${step.hint}</div>
+      <div class="quiz-options ${step.layout === 'two-col' ? 'two-col' : ''}">
+        ${step.options.map(opt => `
+          <div class="quiz-option ${answers[step.id] === opt.value ? 'selected' : ''}"
+               onclick="selectOption('${step.id}', '${opt.value}', this)">
+            <span class="option-icon">${opt.icon}</span>
+            <div>
+              <div class="option-label">${opt.label}</div>
+              <div class="option-desc">${opt.desc}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('btn-back').style.visibility = currentStep === 0 ? 'hidden' : 'visible';
+  document.getElementById('btn-next').disabled = !answers[activeSteps[currentStep].id];
+  const isLast = currentStep === activeSteps.length - 1;
+  document.getElementById('btn-next').textContent = isLast ? '診断結果を見る ✨' : '次へ →';
+}
+
+function selectOption(stepId, value, el) {
+  el.closest('.quiz-options').querySelectorAll('.quiz-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  answers[stepId] = value;
+
+  if (stepId === 'experience' && conditionalSteps[value]) {
+    activeSteps = [...quizSteps];
+    activeSteps.splice(5, 0, conditionalSteps[value]);
+  } else if (stepId === 'experience') {
+    activeSteps = [...quizSteps];
+  }
+
+  document.getElementById('btn-next').disabled = false;
+}
+
+function quizNext() {
+  if (currentStep < activeSteps.length - 1) {
+    currentStep++;
+    renderQuiz();
+  } else {
+    showLoading();
+  }
+}
+
+function quizBack() {
+  if (currentStep > 0) {
+    currentStep--;
+    renderQuiz();
+  }
+}
+
+const loadingMessages = [
+  'フレーバーホイールを解析中…',
+  '産地データと照合しています…',
+  '焙煎プロファイルを最適化中…',
+  'あなただけの一杯を発見しました！'
+];
+
+function showLoading() {
+  document.getElementById('loading').classList.remove('hidden');
+  let i = 0;
+  const interval = setInterval(() => {
+    if (i < loadingMessages.length) {
+      document.getElementById('loading-step').textContent = loadingMessages[i++];
+    } else {
+      clearInterval(interval);
+      document.getElementById('loading').classList.add('hidden');
+      showResult();
+    }
+  }, 900);
+}
+
+function getResultProfile() {
+  const taste = answers.taste;
+  const profiles = {
+    bitter: {
+      name: 'ダーク ロースト',
+      subtitle: 'エスプレッソ ソウル',
+      tagline: 'しっかりとしたコクと力強い苦味に本質を見出す、本格派のコーヒー愛好者。',
+      flavors: ['ダークチョコレート', 'ロースト', 'スモーキー', 'スパイス'],
+      origins: [{ name: 'インドネシア', pct: 90 }, { name: 'ブラジル', pct: 75 }, { name: 'グアテマラ', pct: 60 }],
+      brews: [
+        { icon: '🔴', name: 'エスプレッソ', reason: '高圧抽出でコクを最大限に引き出す' },
+        { icon: '🫗', name: 'フレンチプレス', reason: 'オイル成分を残し重厚な味わいに' }
+      ]
+    },
+    acidic: {
+      name: 'ライト & フルーティー',
+      subtitle: 'スペシャルティ エクスプローラー',
+      tagline: '果実のような華やかな酸味と繊細な香りを愛する、感性豊かなコーヒー探求者。',
+      flavors: ['ベリー', 'シトラス', 'フローラル', 'ジャスミン'],
+      origins: [{ name: 'エチオピア', pct: 95 }, { name: 'ケニア', pct: 85 }, { name: 'コロンビア', pct: 65 }],
+      brews: [
+        { icon: '🫗', name: 'ハンドドリップ', reason: '繊細なフレーバーを丁寧に引き出す' },
+        { icon: '🧊', name: 'コールドブリュー', reason: 'フルーティーさを際立たせる低温抽出' }
+      ]
+    },
+    sweet: {
+      name: 'キャラメル & ナッツ',
+      subtitle: 'コンフォート コーヒーラバー',
+      tagline: '甘くまろやかな余韻とやさしいコクに癒しを求める、温かみのあるコーヒー好き。',
+      flavors: ['キャラメル', 'ヘーゼルナッツ', 'バニラ', 'ブラウンシュガー'],
+      origins: [{ name: 'コロンビア', pct: 88 }, { name: 'ブラジル', pct: 80 }, { name: 'ペルー', pct: 68 }],
+      brews: [
+        { icon: '☕', name: 'カフェラテ', reason: 'スチームミルクでさらに甘さを引き立てる' },
+        { icon: '🫗', name: 'ドリップ（中煎り）', reason: 'バランスよくナッツ感を楽しめる' }
+      ]
+    },
+    clean: {
+      name: 'クリーン & バランス',
+      subtitle: 'ピュアリスト',
+      tagline: 'すっきりとした後味と透明感のある風味に美学を感じる、洗練されたコーヒー通。',
+      flavors: ['アーモンド', 'クリーンアシッド', 'フレッシュ', 'ミルキー'],
+      origins: [{ name: 'コスタリカ', pct: 90 }, { name: 'パナマ', pct: 82 }, { name: 'エクアドル', pct: 70 }],
+      brews: [
+        { icon: '🫗', name: 'ペーパードリップ', reason: '雑味を除きクリアな一杯に' },
+        { icon: '⬛', name: 'AeroPress', reason: 'クリーンかつ濃度調整が自在' }
+      ]
+    }
+  };
+  return profiles[taste] || profiles.sweet;
+}
+
+function showResult() {
+  const profile = getResultProfile();
+  const content = document.getElementById('result-content');
+  content.innerHTML = `
+    <div class="result-hero">
+      <div class="result-type">あなたのコーヒータイプ</div>
+      <div class="result-name">${profile.name}<br><em>${profile.subtitle}</em></div>
+      <p class="result-tagline">${profile.tagline}</p>
+    </div>
+    <div class="result-grid">
+      <div class="result-card">
+        <div class="result-card-title">🍃 フレーバーノート</div>
+        <div class="flavor-tags">
+          ${profile.flavors.map(f => `<span class="flavor-tag">${f}</span>`).join('')}
+        </div>
+      </div>
+      <div class="result-card">
+        <div class="result-card-title">⚙️ おすすめ抽出方法</div>
+        ${profile.brews.map(b => `
+          <div class="brew-method">
+            <span class="brew-icon">${b.icon}</span>
+            <div>
+              <div class="brew-name">${b.name}</div>
+              <div class="brew-reason">${b.reason}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      <div class="result-card">
+        <div class="result-card-title">🌍 おすすめ産地</div>
+        ${profile.origins.map(o => `
+          <div class="origin-bar">
+            <span class="origin-name">${o.name}</span>
+            <div class="origin-track">
+              <div class="origin-fill" style="width:${o.pct}%"></div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      <div class="result-card">
+        <div class="result-card-title">☕ 飲み方スタイル</div>
+        <p style="font-size:0.85rem;line-height:1.7;font-weight:300;color:var(--muted)">
+          ${answers.milk === 'black' ? 'ブラック派のあなたには、豆本来の風味をダイレクトに味わえるシングルオリジンがおすすめです。' :
+            answers.milk === 'milk' ? 'ミルクと合わせるなら、しっかりとしたボディのブレンドや中〜深煎りの豆が相性抜群です。' :
+            answers.milk === 'sweet' ? '甘めが好きなあなたには、キャラメルやチョコレート系のナチュラル精製豆がぴったりです。' :
+            '気分で楽しめる汎用性の高い中煎りブレンドを常備しておくと幸せになれます。'}
+        </p>
+      </div>
+    </div>
+    <div class="result-roasters">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
+        <div class="result-card-title" style="margin:0">🗾 あなたにおすすめのロースター（一部）</div>
+        <span style="font-size:0.75rem;color:var(--muted)">全国${roasters.length}店舗掲載</span>
+      </div>
+      <div class="blur-overlay">
+        <div class="roaster-preview">
+          ${getRecommendedRoasters(3).map(r => `
+            <div class="roaster-mini">
+              <div style="font-size:2rem;margin-bottom:0.4rem">${r.emoji}</div>
+              <div class="roaster-mini-name">${r.name}</div>
+              <div class="roaster-mini-loc">📍 ${r.prefecture}</div>
+              <span class="roaster-mini-badge">${r.style}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="upgrade-banner">
+      <h3>全国${roasters.length}店舗のロースターを<em style="font-style:italic;color:var(--gold)">すべて見る</em></h3>
+      <p>スタンダードプランで、あなたの診断結果に合ったロースターを地域・スタイル別に検索。マップ表示や詳細フレーバーレポートも利用できます。</p>
+      <button class="btn-gold" onclick="showSection('plans')">プランを見る — ¥680/月〜</button>
+    </div>
+    <div style="text-align:center;margin-top:2rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+      <button class="btn-outline" onclick="startQuiz()">もう一度診断する</button>
+      <button class="btn-primary" onclick="showRoasters()">ロースターを見る</button>
+    </div>
+  `;
+  showSection('result');
+}
+
+const roasters = [
+  { name: 'ONIBUS COFFEE', prefecture: '東京', city: '目黒', emoji: '🏙️', style: 'スペシャルティ', tags: ['エチオピア', 'ナチュラル', '浅煎り'], rating: 4.8, region: 'kanto' },
+  { name: 'Blue Bottle Coffee', prefecture: '東京', city: '清澄白河', emoji: '🫙', style: 'シングルオリジン', tags: ['コールドブリュー', 'バランス', '中煎り'], rating: 4.6, region: 'kanto' },
+  { name: 'Fuglen Tokyo', prefecture: '東京', city: '渋谷', emoji: '🦅', style: '北欧スタイル', tags: ['浅煎り', 'クリーン', 'フルーティー'], rating: 4.7, region: 'kanto' },
+  { name: 'LIGHT UP COFFEE', prefecture: '東京', city: '吉祥寺', emoji: '✨', style: 'スペシャルティ', tags: ['ゲイシャ', '浅煎り', '産地重視'], rating: 4.8, region: 'kanto' },
+  { name: 'ABOUT US COFFEE', prefecture: '神奈川', city: '横浜', emoji: '🌊', style: 'カフェスタイル', tags: ['ブレンド', '飲みやすい', 'バランス'], rating: 4.5, region: 'kanto' },
+  { name: 'Weekenders Coffee', prefecture: '京都', city: '富小路', emoji: '🏯', style: 'スペシャルティ', tags: ['ナチュラル', '浅煎り', '丁寧'], rating: 4.7, region: 'kansai' },
+  { name: 'Kurasu Kyoto', prefecture: '京都', city: '京都駅前', emoji: '🍵', style: '日本＋オーストラリア', tags: ['フラットホワイト', 'シングル', '中煎り'], rating: 4.6, region: 'kansai' },
+  { name: 'The Unir Coffee', prefecture: '京都', city: '城陽', emoji: '🏆', style: 'COE特化', tags: ['受賞豆', 'ゲイシャ', '最高品質'], rating: 4.9, region: 'kansai' },
+  { name: 'MANU COFFEE', prefecture: '福岡', city: '薬院', emoji: '🌸', style: 'ロースタリー', tags: ['中煎り', 'ブレンド', '九州発'], rating: 4.7, region: 'kyushu' },
+  { name: 'COFFEE COUNTY', prefecture: '福岡', city: '博多', emoji: '🦁', style: 'スペシャルティ', tags: ['エチオピア', '浅煎り', 'フルーティー'], rating: 4.8, region: 'kyushu' },
+  { name: 'Morihico Coffee', prefecture: '北海道', city: '札幌', emoji: '❄️', style: 'クラシック', tags: ['深煎り', 'コク', '北海道'], rating: 4.6, region: 'hokkaido' },
+  { name: 'ほろにが珈琲', prefecture: '北海道', city: '函館', emoji: '🏔️', style: 'こだわり焙煎', tags: ['深煎り', 'ビター', '老舗'], rating: 4.5, region: 'hokkaido' },
+  { name: 'SWITCH COFFEE', prefecture: '大阪', city: '堀江', emoji: '🔀', style: 'スペシャルティ', tags: ['シングル', 'ナチュラル', '大阪発'], rating: 4.7, region: 'kansai' },
+  { name: '丸山珈琲', prefecture: '長野', city: '小諸', emoji: '🏔️', style: '老舗スペシャルティ', tags: ['ゲイシャ', '産地厳選', '受賞歴多数'], rating: 4.9, region: 'chubu' },
+  { name: 'TRUNK COFFEE', prefecture: '愛知', city: '名古屋', emoji: '🌳', style: 'スペシャルティ', tags: ['浅煎り', 'フルーティー', '中部'], rating: 4.7, region: 'chubu' },
+  { name: 'OKINAWA CERRADO', prefecture: '沖縄', city: '那覇', emoji: '🌺', style: '沖縄発', tags: ['ブレンド', '南国感', '飲みやすい'], rating: 4.4, region: 'okinawa' }
+];
+
+function getRecommendedRoasters(n) {
+  return roasters.slice(0, n);
+}
+
+function showRoasters() {
+  const content = document.getElementById('roasters-content');
+  if (!isPremium) {
+    content.innerHTML = `
+      <div style="max-width:680px;margin:0 auto;padding:0 1rem;">
+        <div class="premium-gate">
+          <h3>🗾 全国${roasters.length}店舗を一気見</h3>
+          <p>スタンダードプランにアップグレードすると、全国のスペシャルティコーヒーロースターを地域・スタイルで絞り込んで検索できます。診断結果との相性表示、マップ表示も対応。</p>
+          <button class="btn-gold" onclick="showSection('plans')">プランを見る — ¥680/月〜</button>
+          <div style="margin-top:1.5rem">
+            <button class="btn-outline" style="color:rgba(245,239,224,0.7);border-color:rgba(245,239,224,0.3)" onclick="previewRoasters()">一部だけプレビューする（無料）</button>
+          </div>
+        </div>
+        <div id="roaster-preview-area"></div>
+      </div>`;
+  } else {
+    renderFullRoasters('all');
+  }
+  showSection('roasters');
+}
+
+function previewRoasters() {
+  const area = document.getElementById('roaster-preview-area');
+  area.innerHTML = `
+    <div style="margin-top:2rem">
+      <div style="font-size:0.75rem;letter-spacing:0.15em;color:var(--caramel);text-transform:uppercase;margin-bottom:1rem">プレビュー（3店舗）</div>
+      <div class="roasters-grid" style="max-width:100%">
+        ${roasters.slice(0, 3).map(r => renderRoasterCard(r)).join('')}
+      </div>
+      <p style="text-align:center;color:var(--muted);font-size:0.85rem;margin-top:1.5rem">残り${roasters.length - 3}店舗はプレミアムプランでご覧いただけます</p>
+    </div>`;
+}
+
+function renderFullRoasters(filter) {
+  const filtered = filter === 'all' ? roasters : roasters.filter(r => r.region === filter);
+  const content = document.getElementById('roasters-content');
+  content.innerHTML = `
+    <div class="roaster-filters">
+      ${[
+        ['all', 'すべて'], ['kanto', '関東'], ['kansai', '関西'],
+        ['kyushu', '九州'], ['hokkaido', '北海道'], ['chubu', '中部'], ['okinawa', '沖縄']
+      ].map(([val, label]) =>
+        `<button class="filter-btn ${filter === val ? 'active' : ''}" onclick="renderFullRoasters('${val}')">${label}</button>`
+      ).join('')}
+    </div>
+    <div class="roasters-grid">${filtered.map(r => renderRoasterCard(r)).join('')}</div>`;
+}
+
+function renderRoasterCard(r) {
+  return `
+    <div class="roaster-card">
+      <div class="roaster-card-top" style="background:var(--cream)">${r.emoji}</div>
+      <div class="roaster-card-body">
+        <div class="roaster-card-name">${r.name}</div>
+        <div class="roaster-card-loc">📍 ${r.prefecture}・${r.city}</div>
+        <div class="roaster-card-tags">
+          ${r.tags.map(t => `<span class="roaster-tag">${t}</span>`).join('')}
+        </div>
+      </div>
+      <div class="roaster-card-footer">
+        <span class="roaster-rating"><span>★</span> ${r.rating}</span>
+        <span style="font-size:0.75rem;color:var(--caramel)">${r.style}</span>
+      </div>
+    </div>`;
+}
+
+function showSection(id) {
+  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+  const navMap = { hero: 'nav-hero', quiz: 'nav-quiz', roasters: 'nav-roasters', plans: 'nav-plans', result: '' };
+  if (navMap[id]) document.getElementById(navMap[id])?.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function openLogin() {
+  document.getElementById('login-modal').classList.remove('hidden');
+}
+
+function closeLogin() {
+  document.getElementById('login-modal').classList.add('hidden');
+}
+
+document.getElementById('login-modal').addEventListener('click', function (e) {
+  if (e.target === this) closeLogin();
+});
+
+renderQuiz();
+</script>
+</body>
+</html>
